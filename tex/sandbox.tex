@@ -1,0 +1,99 @@
+
+\documentclass[a4paper]{article}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes}
+
+\newenvironment{pcbtikz}{\begin{tikzpicture}}{\end{tikzpicture}}
+
+\definecolor{soldermaskgreen}{RGB}{49, 110, 79}
+\definecolor{solderpadgold}{RGB}{192,175,145}
+\definecolor{fr4darkbrown}{RGB}{122,115,75}
+
+\newlength{\soldermaskexpansion}
+\setlength{\soldermaskexpansion}{0.1mm}
+
+\makeatletter
+
+\newcommand{\declaretwopadshape}[9]{
+	
+	\pgfdeclareshape{#9}
+	{
+		\savedanchor\centerpoint{
+			\pgf@x = .5\wd\pgfnodeparttextbox
+			\pgf@y = .5\ht\pgfnodeparttextbox
+		}
+		\anchor{center}{\centerpoint}
+		
+		\anchor{p1}{
+			\centerpoint
+			\pgf@x = #1
+			\pgf@y = #2
+		}
+		
+		\anchor{p2}{
+			\centerpoint
+			\pgf@x = #5
+			\pgf@y = #6
+		}
+						
+		\backgroundpath{
+			\centerpoint
+			\fill[fr4darkbrown] ({#1-#3/2-\soldermaskexpansion},{#2-#4/2-\soldermaskexpansion}) rectangle ++ (#3+2*\soldermaskexpansion,#4+2*\soldermaskexpansion);
+			\fill[fr4darkbrown] ({#5-#7/2-\soldermaskexpansion},{#6-#8/2-\soldermaskexpansion}) rectangle ++ (#7+2*\soldermaskexpansion,#8+2*\soldermaskexpansion);
+			\fill[solderpadgold] ({#1-#3/2},{#2-#4/2}) rectangle ++ (#3,#4);
+			\fill[solderpadgold] ({#5-#7/2},{#6-#8/2}) rectangle ++ (#7,#8);
+		}		
+	}
+}
+
+\makeatother
+
+\newcommand{\declareRCsmdshape}[5]{
+	
+	\declaretwopadshape{-#4/2 - #3/2}{0}{#3}{#2}{#4/2 + #3/2}{0}{#3}{#2}{#5}
+}
+
+\declareRCsmdshape{0.025in}{0.0079in}{0.009in}{0.010in}{SMD01005}
+\declareRCsmdshape{0.050in}{0.012in}{0.018in}{0.015in}{SMD0201}
+\declareRCsmdshape{0.075in}{0.020in}{0.025in}{0.025in}{SMD0402}
+\declareRCsmdshape{0.100in}{0.031in}{0.038in}{0.025in}{SMD0603}
+\declareRCsmdshape{0.120in}{0.050in}{0.045in}{0.030in}{SMD0805}
+\declareRCsmdshape{0.195in}{0.063in}{0.060in}{0.075in}{SMD1206}
+
+\begin{document}
+	
+\section*{pcbTikZ sandbox}
+
+\subsection*{Standard RC SMD footprints}
+	
+\begin{pcbtikz}
+	
+%	\fill[green] (-5,-5) rectangle (5,5);
+	
+	\foreach \x/\footprint in {0/SMD01005, 1/SMD0201, 2/SMD0402, 3/SMD0603, 4/SMD0805, 5/SMD1206} 
+	{
+	    \draw (\x*2,0) node[\footprint] (n\x) {};
+	    \node[anchor=north, inner sep=.25cm] (l) at (n\x.center) {\footprint};
+ }
+
+\end{pcbtikz}
+
+\subsection*{Example}
+
+\begin{figure}[h]
+	\centering
+	\begin{pcbtikz}
+		\fill[soldermaskgreen] (-.5,-1.5) rectangle (6.75,1);
+		\foreach \x in {0, ..., 25}
+			\draw (\x/6, .5) node[SMD0603, rotate=90] (c\x) {};
+		\foreach \x in {0, ..., 25}
+			\draw (\x/4, 0) node[SMD0805, rotate=90] (c\x) {};
+		\foreach \x in {0, ..., 25}
+			\draw (\x/4, -.7) node[SMD1206, rotate=90] (c\x) {};
+	\end{pcbtikz}
+	\caption{RC arrays on a single PCB.}
+\end{figure}
+
+
+\end{document}
